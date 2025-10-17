@@ -1,6 +1,6 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization -->
 
-This is an AI Agentic System Design Documentation project for Facebook Fan Pages customer service. The project contains comprehensive technical documentation in Thai language covering system architecture, RLHF learning mechanisms, multi-language capabilities, and implementation blueprints.
+This is the Iris Origin - AI Agentic Platform documentation project for Facebook Fan Pages customer service. The project contains comprehensive technical documentation in Thai language covering system architecture, RLHF learning mechanisms, multi-language capabilities, and implementation blueprints.
 
 ## Project Structure
 - System architecture documents
