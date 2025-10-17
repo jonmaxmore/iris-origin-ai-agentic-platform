@@ -13,7 +13,15 @@ import logging
 import uvicorn
 from typing import Dict, List, Optional
 import os
+import sys
 from datetime import datetime
+
+# Add project root to path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(project_root)
+
+# Import our AI processing engine
+from src.ai_service.simple_processor import SimpleAIProcessor
 
 # Configure structured logging
 logging.basicConfig(
@@ -21,6 +29,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Initialize AI Processor
+ai_processor = SimpleAIProcessor()
+logger.info("AI Processor initialized successfully")
 
 # Initialize FastAPI with enterprise configuration
 app = FastAPI(
@@ -59,6 +71,52 @@ class HealthCheck(BaseModel):
     version: str
 
 # Health check endpoint
+@app.post("/api/process-message", response_model=MessageResponse)
+async def process_message_endpoint(request: MessageRequest):
+    """
+    Process a message using AI engine
+    
+    This endpoint accepts a message and returns AI-processed results including:
+    - Intent classification
+    - Sentiment analysis 
+    - Language detection
+    - Entity extraction
+    - Suggested response
+    """
+    try:
+        logger.info(f"Processing message: {request.message[:50]}...")
+        
+        # Process message using AI engine
+        result = await ai_processor.process_message(
+            message_text=request.message,
+            user_id=request.user_id or "unknown"
+        )
+        
+        # Return structured response
+        response = MessageResponse(
+            success=True,
+            message="Message processed successfully",
+            data={
+                "intent": result.intent,
+                "confidence": result.confidence,
+                "sentiment": result.sentiment,
+                "sentiment_score": result.sentiment_score,
+                "language": result.language,
+                "entities": result.entities,
+                "suggested_response": result.suggested_response,
+                "processing_time_ms": result.processing_time_ms,
+                "timestamp": datetime.now().isoformat()
+            }
+        )
+        
+        logger.info(f"Message processed successfully: intent={result.intent}, sentiment={result.sentiment}")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error processing message: {e}")
+        raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+
 @app.get("/health", response_model=HealthCheck)
 async def health_check():
     """Health check endpoint for monitoring"""
